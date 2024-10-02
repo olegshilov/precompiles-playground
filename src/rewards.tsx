@@ -337,11 +337,16 @@ export function AllRewards() {
         );
       }
 
+      // Format maxRetrieve to remove decimals and convert back to bigint
+      const formattedMaxRetrieve = BigInt(
+        Math.floor(Number(formatUnits(maxRetrieve, 18)))
+      );
+
       const txHash = await writeContractAsync({
         address: DISTRIBUTION_PRECOMPILE_ADDRESS,
         abi: withdrawAllDelegatorRewardsAbi,
         functionName: "claimRewards",
-        args: [address, maxRetrieve],
+        args: [address, formattedMaxRetrieve],
       });
 
       if (!txHash) {
@@ -385,14 +390,22 @@ export function AllRewards() {
             disabled={!rewards}
             onClick={async () => {
               if (rewards) {
+                // Format maxRetrieve here as well
+                const formattedMaxRetrieve = BigInt(
+                  Math.floor(
+                    Number(
+                      formatUnits(rewards[1][0].amount, rewards[1][0].precision)
+                    )
+                  )
+                );
                 const fee = await handlePrecompileClaimAllRewardsEstimatedFee(
-                  rewards[1][0].amount
+                  formattedMaxRetrieve
                 );
                 console.log({ fee });
               }
             }}
           >
-            Get estinated fee for claim all rewards
+            Get estimated fee for claim all rewards
           </button>
           <button
             disabled={!rewards}
